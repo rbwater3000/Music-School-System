@@ -9,27 +9,27 @@ function Footer() {
         <div className='footer1'>
             <div className="footer-logo"></div>
             <div className="footer-title">
-            <p>Time to travel</p>
+            <p>Mixlab Music Studio</p>
             </div>
             <div className="location1">
                 <div className="footer-circle"></div>
-                <span className='street'><p>123 Anywhere St., Any City</p></span>
+                <span className='street'><p>Pasig City</p></span>
             </div>
 
             <div className="location1">
                 <div className="footer-circle1"></div>
-                <span className='street'><p>123-456-7890</p></span>
+                <span className='street'><p>0919-456-7890</p></span>
             </div>
 
             <div className="location1">
                 <div className="footer-circle1"></div>
-                <span className='street'><p>hellocallcenter@gmail.com</p></span>
+                <span className='street'><p>jazelanne@gmail.com</p></span>
             </div>
         </div>
         <div className='footer2'>
             <span><p>Home</p></span>
-            <span><p>Trip Catelog</p></span>
-            <span><p>Countries</p></span>
+            <span><p>Services</p></span>
+            <span><p>Divisions</p></span>
             <span><p>Contact</p></span>
             <span><p>About</p></span>
         </div>
@@ -68,7 +68,7 @@ function Footer() {
         </div>
     </div>
     <div className="column2">
-            Copyright © 2024 Pro Health. All rights reserved.
+            Copyright © 2023 Mixlab Music Studio. All rights reserved.
     </div>
 </section>
   )

@@ -15,13 +15,10 @@ const Homepage = () => {
   const carouselRef = useRef(null);
 
   const sliderItems = [
-    { img: '/src/assets/1mixlabphoto/studio/micropone.jpg', title: 'TIME TO TRAVEL'},
-
-    { img: '/src/assets/1mixlabphoto/studio/studio1.1.jpg', title: 'TIME TO TRAVEL'},
-
-    { img: '/src/assets/1mixlabphoto/studio/studio1.2.jpg', title: 'TIME TO TRAVEL'},
-
-    { img: '/src/assets/1mixlabphoto/studio/studiomic.jpg', title: 'TIME TO TRAVEL'},
+    { img: '/src/assets/1mixlabphoto/studio/micropone.jpg', title: 'MIXLAB'},
+    { img: '/src/assets/1mixlabphoto/studio/studio1.1.jpg', title: 'MIXLAB'},
+    { img: '/src/assets/1mixlabphoto/studio/studio1.2.jpg', title: 'MIXLAB'},
+    { img: '/src/assets/1mixlabphoto/studio/studiomic.jpg', title: 'MIXLAB'},
   ];
 
   useEffect(() => {
@@ -113,29 +110,29 @@ const Homepage = () => {
     </section>
 
     <section className='card'>
-        <div className="favourite-tour"data-aos="slide-up" data-aos-duration="1800">
-        <p>Find your favourite tour</p>
-        <h2>In Our Small town, east luwu</h2>
+        <div className="line-title"data-aos="slide-up" data-aos-duration="1800">
+            <p>Featured</p>
+            <h2>Mixlab Music Studio</h2>
         </div>
-        <div className="town-east">
+        <div className="mx-event">
           <div className='tour1'data-aos="slide-up" data-aos-duration="1400">
-            <span>TOUR 1</span>
-            <p>There will be a small</p>
+            <span>Christian Bautista</span>
+            <p>Guest Artist</p>
           </div>
 
           <div className='tour2'data-aos="slide-up" data-aos-duration="1600">
-          <span>TOUR 2</span>
-          <p>There will be a small</p>
+          <span>Bugoy Drilon</span>
+          <p>Guest Artist</p>
           </div>
 
           <div className='tour3' data-aos="slide-up" data-aos-duration="1800">
-          <span>TOUR 3</span>
-          <p>There will be a small</p>
+          <span>Zild</span>
+          <p>Guest Artist</p>
           </div>
 
           <div className='tour4' data-aos="slide-up" data-aos-duration="2000">
-          <span>TOUR 4</span>
-          <p>There will be a small</p>
+          <span>Leonides</span>
+          <p>Guest Artist</p>
           </div>
         </div>
     </section>
@@ -145,30 +142,34 @@ const Homepage = () => {
             <div className='line' data-aos="slide-left" data-aos-duration="1600"></div>
     </section>
 
-    <section className='blog'>
-            <div className="blog1">
+    <section className='blog'> 
 
-              <div className="blog-card"data-aos="slide-up" data-aos-duration="1400">
-                <div className="media-content">
-                    
-                </div>
+            <div className="-title"data-aos="slide-up" data-aos-duration="1800">
+                <p>Mixlab</p>
+                <h2>Events</h2>
+            </div>
+               
+            <div className="blog1"> 
 
-                <span className='date'>May 1, 2023</span>
+            <div className="blog-card"data-aos="slide-up" data-aos-duration="1400">
+                <div className="media-content">  
+            </div>
+
+                <span className='date'>November 23, 2025</span>
 
                 <div className="information">
-                    <h2><a href="#" className='cs_post_title cs_semibold cs_fs_32'>The Benefits of Mindfulness Meditation for Stress and  Anxiety</a></h2>
+                    <h2><a href="#" className='cs_post_title cs_semibold cs_fs_32'>Music Production Workshop</a></h2>
                 </div>
             </div>
 
             <div className="blog-card"data-aos="slide-up" data-aos-duration="1600">
-                <div className="media-content1">
-                    
-                </div>
+                <div className="media-content1">               
+            </div>
 
-                <span className='date'>May 1, 2023</span>
+                <span className='date'>December 14, 2025</span>
 
-                <div className="information">
-                    <h2><a href="#" className='cs_post_title cs_semibold cs_fs_32'>Healthy Eating on a Budget: Tips and Strategies</a></h2>
+            <div className="information">
+                    <h2><a href="#" className='cs_post_title cs_semibold cs_fs_32'>Grand Recital Vol.4</a></h2>
                 </div>
             </div>
 
@@ -178,16 +179,16 @@ const Homepage = () => {
                     
                 </div>
 
-                <span className='date'>May 1, 2023</span>
+                <span className='date'>January 1 ,2026</span>
 
                 <div className="information">
-                    <h2><a href="#" className='cs_post_title cs_semibold cs_fs_32'>The Importance of Regular Cancer Screenings and Early Detection</a></h2>
+                    <h2><a href="#" className='cs_post_title cs_semibold cs_fs_32'>The Start of the Year 2026</a></h2>
                 </div>
             </div>
               </div>
     </section>
 
-    <section className='blog100'>
+   {/*   <section className='blog100'>
             <div className="blog1">
             <div className="blog-play" data-aos="slide-up" data-aos-duration="1400">
                 <div className="billboard">
@@ -214,48 +215,66 @@ const Homepage = () => {
                 </div>
             </div>
             </div>
-    </section>
+      </section> */}
 
 
     <section className='bash'>
           <div className="room">
             <div className="room1">
               <div className="check"data-aos="slide-right" data-aos-duration="1400">
-                <h1>TRAVEL AND ENJOY YOUR HOLIDAY</h1>
+                <h1>MIXLAB MUSIC STUDIO</h1>
               </div>
+
               <div className="check1"data-aos="slide-right" data-aos-duration="1600">
-                <p>The Raja Ampat Islands are group of islands located in the western part of the Birds Head
-                  Peninsula on the island of New Guinea.
-                  Administratively, the cluster under Raja Ampat 
-                  Regency and Soron city
+                <p>MixLab Music Studios Inc. is a music company that provides a wide range 
+                  of services such as music production, custom jingle creation, rehearsal
+                  and recording space, and music education. With a focus on quality, creativity, 
+                  and client satisfaction, MixLab aims to be a one-stop destination for all audio 
+                  and music production needs.
                 </p>
               </div>
+
             </div>
             <div className="room2">
-              <div className="videocard"data-aos="slide-left" data-aos-duration="1800">
-              <video src="/src/assets/Images/istockphoto-1151597371-640_adpp_is.mp4" className='vi' autoPlay loop muted></video>
+              <div className="videocard" data-aos="slide-left" data-aos-duration="1800">
+                <iframe 
+                  className='vi' 
+                  src="https://www.youtube.com/embed/cpKqqQNukuU?autoplay=1&mute=0&loop=1&playlist=cpKqqQNukuU&controls=0&showinfo=0" 
+                  title="YouTube video player" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  allowFullScreen
+                ></iframe>
               </div>
+
+              {/* <div className="videocard"data-aos="slide-left" data-aos-duration="1800">
+              <video src="https://www.youtube.com/watch?v=cpKqqQNukuU" className='vi' autoPlay loop muted></video>
+              </div>    USE THIS IF THE VIDEO IS FROM PC*/}
+              
             </div>
           </div>
     </section>
 
     <section className='whyus'>
       <div className="whyus-nav"data-aos="fade-up" data-aos-duration="1400">
-        <h2>4 Reasons Why you should visit new zealand</h2>
+        <h2>Premium Music Lesson</h2>
       </div>
       <div className="whyus-card"data-aos="slide-up" data-aos-duration="1400">
           <div className='whyus-card1'>
             <div className='whyus-title' data-aos="slide-right" data-aos-duration="1400">TRIP OF YOUR DREAM</div>
             <div className='span-split'data-aos="slide-right" data-aos-duration="1600">
-              <span>1. Breathtaking Scenery - From stunning fjords to rolling hills, New Zealand offers incredible landscapes for every nature lover.</span>
-              <span>2. Adventure Capital - Known for activities like bungee jumping, skydiving, and hiking, it's a paradise for thrill-seekers.</span>
-              <span>3. Rich Māori Culture - Experience authentic Māori traditions, art, and history, adding a cultural depth to your trip.</span>
-              <span>4. Unique Wildlife - Spot native species like the kiwi bird, dolphins, and even penguins in their natural habitats.</span>
+              <span>1. Enroll now at 𝗠𝗶𝘅𝗟𝗮𝗯 𝗠𝘂𝘀𝗶𝗰 𝗦𝘁𝘂𝗱𝗶𝗼𝘀 and experience the joy of 𝗽𝗿𝗲𝗺𝗶𝘂𝗺 𝗾𝘂𝗮𝗹𝗶𝘁𝘆 music lessons for you or your child! </span>
+              <span>2. Plus, enjoy a 𝗳𝗿𝗲𝗲 𝗮𝘂𝗱𝗶𝗼 𝗮𝗻𝗱 𝘃𝗶𝗱𝗲𝗼 recording session when you complete any Standard to VIP package.</span>
+              <span>3. Your chance to experience what it's like to be in a real studio</span>
+              <span>4. Who knows? You might just be the next recording artist!</span>
             </div>
-            <div className='whyus-block'>
+
+          <div className='whyus-block'>
               <button className='readmore'data-aos="slide-right" data-aos-duration="1800">Read More</button>
             </div>
-          </div>
+          </div> 
+
           <div className='whyus-card2'>
             <div className="cards">
               <div className="card red"data-aos="slide-up" data-aos-duration="1400"></div>
@@ -273,9 +292,9 @@ const Homepage = () => {
           <div className="us"data-aos="slide-up" data-aos-duration="1400">WHY US?</div>
           <div className="hobbition">
               <div className="hobbition-info"data-aos="slide-right" data-aos-duration="1400">
-                <h2>Hobbision</h2>
-                <span>Discover incredible destinations and unbeatable travel deals.
-                  Plan your perfect getaway and embark on new adventures.
+                <h2>Mixlab Music Studio</h2>
+                <span>Discover incredible talents and unbeatable music recording deals.
+                  Plan your perfect getaway and embark on new music.
                   </span>
                   <button className='readmore'>Read More</button>
               </div>
@@ -331,6 +350,6 @@ const Homepage = () => {
     </section>
     </div>
   );
-};
+}; 
 
 export default Homepage;
