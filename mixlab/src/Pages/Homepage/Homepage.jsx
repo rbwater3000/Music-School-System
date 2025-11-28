@@ -3,6 +3,11 @@ import './Homepage.css'
 // import AOS from 'aos';
 // import 'aos/dist/aos.css';
 
+import micImg from '../../assets/1mixlabphoto/studio/micropone.jpg';
+import studio1Img from '../../assets/1mixlabphoto/studio/studio1.1.jpg';
+import studio2Img from '../../assets/1mixlabphoto/studio/studio1.2.jpg';
+import studioMicImg from '../../assets/1mixlabphoto/studio/studiomic.jpg';
+
 const Homepage = () => {
 
     //   AOS.init({
@@ -15,10 +20,10 @@ const Homepage = () => {
   const carouselRef = useRef(null);
 
   const sliderItems = [
-    { img: '/src/assets/1mixlabphoto/studio/micropone.jpg', title: 'MIXLAB'},
-    { img: '/src/assets/1mixlabphoto/studio/studio1.1.jpg', title: 'MIXLAB'},
-    { img: '/src/assets/1mixlabphoto/studio/studio1.2.jpg', title: 'MIXLAB'},
-    { img: '/src/assets/1mixlabphoto/studio/studiomic.jpg', title: 'MIXLAB'},
+   { img: micImg, title: 'MIXLAB'},         // Use the variable, not the string
+    { img: studio1Img, title: 'MIXLAB'},
+    { img: studio2Img, title: 'MIXLAB'},
+    { img: studioMicImg, title: 'MIXLAB'},
   ];
 
   useEffect(() => {
@@ -55,7 +60,7 @@ const Homepage = () => {
           <div key={index} className="item" style={{ display: index === currentIndex ? 'block' : 'none' }}>
             <img src={item.img} alt={item.title} />
             <div className="content">
-              <div className="title">Mixlab Music Studio</div>
+              <div className="title">MixLab Music Studios</div>
               <div className="des">
               MixLab Music Studios Inc. is a music company that provides a wide 
               range of services such as music production, custom jingle creation, 
@@ -235,11 +240,12 @@ const Homepage = () => {
               </div>
 
             </div>
+
             <div className="room2">
               <div className="videocard" data-aos="slide-left" data-aos-duration="1800">
                 <iframe 
                   className='vi' 
-                  src="https://www.youtube.com/embed/cpKqqQNukuU?autoplay=1&mute=1&loop=1&playlist=cpKqqQNukuU&controls=0&showinfo=0" 
+                  src="https://www.youtube.com/embed/cpKqqQNukuU?autoplay=0&mute=0&loop=1&playlist=cpKqqQNukuU&controls=0&showinfo=0" 
                   title="YouTube video player" 
                   frameBorder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 

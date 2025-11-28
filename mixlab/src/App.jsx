@@ -15,6 +15,9 @@ import Footer from './Components/Footer/Footer'
 import Nav from "./Components/Navbar/Nav";
 import Login from './Components/Login/Login';
 import Register from './Components/Login/Register/Register'; 
+import Booking from './Components/Booking/Booking';
+import BookingSuccess from './Components/Booking/BookingSuccess';
+import AdminDashboard from './Components/Admin/AdminDashboard';
 
 const App = () => {
   return (
@@ -25,8 +28,15 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />}/> 
-          <Route path="/register" element={<Register />} /> firebase init
+          <Route path="/register" element={<Register />} />
 
+          {/* BOOKING PO ITO HAHA */}
+        <Route path="/booking" element={<Booking />} />
+        <Route path="/booking-success" element={<BookingSuccess />} />
+
+         {/* ADMIN NA MALUPIT ITO */}
+         <Route path="/admindashboard" element={<AdminDashboard />} />
+         
          {/* 
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
