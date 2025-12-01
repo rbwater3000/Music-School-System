@@ -8,6 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
 import { generateLlamaInsights } from '../../services/groqService';
+import { generateAutoAnalysis, clearAnalysisCache } from '../../services/realTimeAnalytics';
 
 const AdminReports = () => {
   const [bookings, setBookings] = useState([]);
@@ -22,10 +23,19 @@ const AdminReports = () => {
   const [loading, setLoading] = useState(false);
   const [selectedReport, setSelectedReport] = useState('overview');
   const [insightsTab, setInsightsTab] = useState('insights'); // 'insights' or 'recommendations'
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
 
   // Fetch and process all data
   useEffect(() => {
     fetchAllData();
+    
+    // Auto-refresh every 5 minutes
+    const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing data...');
+      fetchAllData();
+    }, 5 * 60 * 1000);
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const fetchAllData = async () => {
@@ -42,12 +52,19 @@ const AdminReports = () => {
       setUsers(usersData);
 
       // Calculate KPIs
-      calculateKPIs(bookingsData, usersData);
+      const calculatedKpis = calculateKPIs(bookingsData, usersData);
 
       // Generate analytics data
-      generateCustomerBehavior(bookingsData);
-      generateLearningProgress(bookingsData);
+      const behavior = generateCustomerBehavior(bookingsData);
+      const progress = generateLearningProgress(bookingsData);
       generateStudioPerformance(bookingsData);
+
+      // Trigger automatic real-time analysis
+      setInsightsLoading(true);
+      const analysis = await generateAutoAnalysis(calculatedKpis, behavior, progress, bookingsData, usersData);
+      setAiInsights(analysis);
+      setLastUpdateTime(new Date());
+      setInsightsLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -66,14 +83,17 @@ const AdminReports = () => {
     // Customer satisfaction (mock data)
     const avgSatisfaction = 4.5;
 
-    setKpis({
+    const kpisData = {
       totalBookings,
       confirmedBookings,
       bookingConversionRate,
       totalUsers: usersData.length,
       estimatedRevenue,
       avgSatisfaction
-    });
+    };
+
+    setKpis(kpisData);
+    return kpisData;
   };
 
   const generateCustomerBehavior = (bookingsData) => {
@@ -97,6 +117,7 @@ const AdminReports = () => {
     }));
 
     setCustomerBehavior(chartData);
+    return chartData;
   };
 
   const generateLearningProgress = (bookingsData) => {
@@ -123,6 +144,7 @@ const AdminReports = () => {
     }));
 
     setLearningProgress(chartData);
+    return chartData;
   };
 
   const generateStudioPerformance = (bookingsData) => {
@@ -146,105 +168,6 @@ const AdminReports = () => {
     }));
 
     setStudioPerformance(chartData);
-  };
-
-  // Generate AI Insights using Llama 3
-  const generateAIInsights = async () => {
-    setInsightsLoading(true);
-    setInsightsError(null);
-    try {
-      // Prepare data summary for Llama analysis
-      const sortedServices = [...customerBehavior].sort((a, b) => b.bookings - a.bookings).slice(0, 3);
-      
-      const dataSummary = {
-        totalBookings: kpis.totalBookings || 0,
-        confirmedBookings: kpis.confirmedBookings || 0,
-        conversionRate: kpis.bookingConversionRate || 0,
-        totalUsers: kpis.totalUsers || 0,
-        revenue: kpis.estimatedRevenue || 0,
-        topServices: sortedServices,
-        totalMonths: learningProgress.length,
-        timestamp: new Date().toLocaleString()
-      };
-
-      console.log('Generating insights for data:', dataSummary);
-
-      // Call AI with prompt-based analysis
-      const insights = await generateIntelligentInsights(dataSummary);
-      
-      if (insights) {
-        console.log('Received insights:', insights);
-        setAiInsights(insights);
-      } else {
-        setInsightsError('Failed to generate insights');
-      }
-    } catch (error) {
-      console.error('Error generating AI insights:', error);
-      setInsightsError(`Error: ${error.message}`);
-    } finally {
-      setInsightsLoading(false);
-    }
-  };
-
-  const generateIntelligentInsights = async (dataSummary) => {
-    try {
-      const prompt = `You are an expert data analyst specializing in studio performance optimization and business intelligence. Your role is to analyze comprehensive studio metrics and provide actionable, data-driven insights and recommendations.
-
-## STUDIO PERFORMANCE DATA
-- Total Bookings: ${dataSummary.totalBookings}
-- Confirmed Bookings: ${dataSummary.confirmedBookings}
-- Booking Conversion Rate: ${dataSummary.conversionRate}%
-- Total Active Users: ${dataSummary.totalUsers}
-- Estimated Revenue: ₱${dataSummary.revenue?.toLocaleString() || 0}
-- Top Services: ${dataSummary.topServices?.map(s => `${s.name} (${s.bookings} bookings, ₱${s.revenue?.toLocaleString() || 0} revenue)`).join('; ') || 'None'}
-- Data Period: ${dataSummary.totalMonths} months
-
-## ANALYSIS REQUIREMENTS
-
-Analyze this data and provide insights in JSON format with these exact keys:
-
-1. **keyInsights** (array of 4-5 strings): Most significant patterns and metrics
-   - Use specific numbers and percentages
-   - Connect findings to business impact
-   - Identify both positive trends and concerns
-
-2. **growthOpportunities** (array of 4-5 strings): Revenue and engagement expansion opportunities
-   - Break down by service categories or customer segments
-   - Include concrete action steps
-   - Prioritize by impact potential
-
-3. **riskAlerts** (array of 2-3 strings): Areas requiring immediate attention
-   - Flag conversion rate issues, pending bookings, or service imbalances
-   - Suggest possible root causes
-
-4. **recommendedActions** (array of 5-6 strings): Specific, prioritized recommendations
-   - Format: "[Priority: HIGH/MEDIUM] Action - Expected Impact"
-   - Include success metrics to track
-   - Estimate potential business impact when possible
-
-## TONE & STYLE
-- Be clear, concise, and data-focused
-- Use comparative language (e.g., "up 23% vs average", "2.5x higher")
-- Prioritize insights that directly impact revenue or customer satisfaction
-- Avoid jargon; explain technical terms when necessary
-
-Return ONLY valid JSON with no markdown, code blocks, or extra text.`;
-
-      const response = await generateLlamaInsights({ prompt, isCustomPrompt: true });
-      
-      if (response && typeof response === 'string') {
-        try {
-          return JSON.parse(response);
-        } catch (e) {
-          console.error('Failed to parse AI response:', e);
-          return getDefaultInsights(dataSummary);
-        }
-      }
-      return getDefaultInsights(dataSummary);
-    } catch (error) {
-      console.error('Error in generateIntelligentInsights:', error);
-      return getDefaultInsights(dataSummary);
-    }
   };
 
   const getDefaultInsights = (dataSummary) => {
@@ -500,27 +423,22 @@ Return ONLY valid JSON with no markdown, code blocks, or extra text.`;
               <div className="insights-title">
                 <Sparkles size={24} color="#ffd700" />
                 <div>
-                  <h2>Llama 3 AI Insights & Recommendations</h2>
-                  <p className="ai-subtitle">Powered by Groq - Free AI Analysis</p>
+                  <h2>Real-Time AI Insights & Recommendations</h2>
+                  <p className="ai-subtitle">
+                    {insightsLoading ? (
+                      <>
+                        <Loader size={14} style={{display: 'inline', marginRight: '6px'}} className="spinner" />
+                        Analyzing your data...
+                      </>
+                    ) : (
+                      <>
+                        Powered by Groq - Auto-updating every 5 minutes
+                        {lastUpdateTime && <span style={{marginLeft: '12px', fontSize: '0.9em', color: '#888'}}>Last updated: {lastUpdateTime.toLocaleTimeString()}</span>}
+                      </>
+                    )}
+                  </p>
                 </div>
               </div>
-              <button 
-                className="generate-btn"
-                onClick={generateAIInsights}
-                disabled={insightsLoading || !import.meta.env.VITE_GROQ_API_KEY}
-              >
-                {insightsLoading ? (
-                  <>
-                    <Loader size={16} className="spinner" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={16} />
-                    Generate Insights
-                  </>
-                )}
-              </button>
             </div>
 
             {!import.meta.env.VITE_GROQ_API_KEY && (
@@ -571,50 +489,109 @@ Return ONLY valid JSON with no markdown, code blocks, or extra text.`;
                 {/* Insights Tab */}
                 {insightsTab === 'insights' && (
                   <div className="insights-grid">
-                    {/* Key Insights */}
-                    <div className="insight-card">
-                      <h3><BarChart3 size={20} style={{display: 'inline', marginRight: '8px'}} /> Key Insights</h3>
-                      <ul className="insights-list">
-                        {aiInsights.keyInsights.map((insight, idx) => (
-                          <li key={idx}>{insight}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Real-time Insights */}
+                    {aiInsights.insights && aiInsights.insights.length > 0 && (
+                      <div className="insight-card">
+                        <h3><BarChart3 size={20} style={{display: 'inline', marginRight: '8px'}} /> Real-Time Insights</h3>
+                        <ul className="insights-list">
+                          {aiInsights.insights.map((insight, idx) => (
+                            <li key={idx}>
+                              <strong>{insight.title}</strong>
+                              <p>{insight.description}</p>
+                              {insight.metric && (
+                                <small>
+                                  Current: {insight.metric.current} {insight.metric.unit} 
+                                  {insight.metric.changePercent !== 0 && ` (${insight.metric.changePercent > 0 ? '+' : ''}${insight.metric.changePercent}%)`}
+                                </small>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                    {/* Risk Alerts */}
-                    <div className="insight-card warning">
-                      <h3><AlertTriangle size={20} style={{display: 'inline', marginRight: '8px'}} /> Risk Alerts</h3>
-                      <ul className="insights-list">
-                        {aiInsights.riskAlerts.map((risk, idx) => (
-                          <li key={idx}>{risk}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Alerts */}
+                    {aiInsights.alerts && aiInsights.alerts.length > 0 && (
+                      <div className="insight-card warning">
+                        <h3><AlertTriangle size={20} style={{display: 'inline', marginRight: '8px'}} /> Alerts</h3>
+                        <ul className="insights-list">
+                          {aiInsights.alerts.map((alert, idx) => (
+                            <li key={idx}>
+                              <strong>{alert.message}</strong>
+                              <p>{alert.suggestedAction}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Fallback for old format */}
+                    {aiInsights.keyInsights && !aiInsights.insights && (
+                      <>
+                        <div className="insight-card">
+                          <h3><BarChart3 size={20} style={{display: 'inline', marginRight: '8px'}} /> Key Insights</h3>
+                          <ul className="insights-list">
+                            {aiInsights.keyInsights.map((insight, idx) => (
+                              <li key={idx}>{insight}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="insight-card warning">
+                          <h3><AlertTriangle size={20} style={{display: 'inline', marginRight: '8px'}} /> Risk Alerts</h3>
+                          <ul className="insights-list">
+                            {aiInsights.riskAlerts?.map((risk, idx) => (
+                              <li key={idx}>{risk}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
                 {/* Recommendations Tab */}
                 {insightsTab === 'recommendations' && (
                   <div className="insights-grid">
-                    {/* Growth Opportunities */}
-                    <div className="insight-card success">
-                      <h3><TrendingUpIcon size={20} style={{display: 'inline', marginRight: '8px'}} /> Growth Opportunities</h3>
-                      <ul className="insights-list">
-                        {aiInsights.growthOpportunities.map((opp, idx) => (
-                          <li key={idx}>{opp}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Real-time Recommendations */}
+                    {aiInsights.recommendations && aiInsights.recommendations.length > 0 && (
+                      <div className="insight-card action">
+                        <h3><CheckCircle size={20} style={{display: 'inline', marginRight: '8px'}} /> Recommended Actions</h3>
+                        <ul className="insights-list">
+                          {aiInsights.recommendations.map((rec, idx) => (
+                            <li key={idx}>
+                              <strong>{rec.title}</strong>
+                              <p>{rec.description}</p>
+                              <p><em>Action: {rec.action}</em></p>
+                              {rec.potentialImpact && <small>Impact: {rec.potentialImpact}</small>}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                    {/* Recommended Actions */}
-                    <div className="insight-card action">
-                      <h3><CheckCircle size={20} style={{display: 'inline', marginRight: '8px'}} /> Recommended Actions</h3>
-                      <ul className="insights-list">
-                        {aiInsights.recommendedActions.map((action, idx) => (
-                          <li key={idx}>{action}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Fallback for old format */}
+                    {aiInsights.growthOpportunities && !aiInsights.recommendations && (
+                      <>
+                        <div className="insight-card success">
+                          <h3><TrendingUpIcon size={20} style={{display: 'inline', marginRight: '8px'}} /> Growth Opportunities</h3>
+                          <ul className="insights-list">
+                            {aiInsights.growthOpportunities.map((opp, idx) => (
+                              <li key={idx}>{opp}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="insight-card action">
+                          <h3><CheckCircle size={20} style={{display: 'inline', marginRight: '8px'}} /> Recommended Actions</h3>
+                          <ul className="insights-list">
+                            {aiInsights.recommendedActions?.map((action, idx) => (
+                              <li key={idx}>{action}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
