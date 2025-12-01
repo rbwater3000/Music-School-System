@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, RefreshCw, Download, Sparkles, Loader, TrendingUp, Users, Music, Zap, AlertCircle, BarChart3, TrendingUp as TrendingUpIcon, Lightbulb, CheckCircle, AlertTriangle, Target } from 'lucide-react';
+import { FileText, RefreshCw, Download, Sparkles, Loader, TrendingUp, Users, Music, Zap, AlertCircle, BarChart3, TrendingUp as TrendingUpIcon, Lightbulb, CheckCircle, AlertTriangle, Target, TrendingDown, DollarSign, Calendar, Shield, Eye } from 'lucide-react';
 import './Admin.css';
 import { db } from '../../firebase';
 import { collection, getDocs } from 'firebase/firestore';
@@ -11,6 +11,22 @@ import { generateLlamaInsights } from '../../services/groqService';
 import { generateAutoAnalysis, clearAnalysisCache } from '../../services/realTimeAnalytics';
 
 const AdminReports = () => {
+  // Helper function to get icon component from visual code
+  const getIconFromVisualCode = (visualCode) => {
+    const iconMap = {
+      '🟢': <TrendingUp size={18} style={{color: '#10b981'}} />,
+      '🔵': <Eye size={18} style={{color: '#3b82f6'}} />,
+      '🟡': <AlertCircle size={18} style={{color: '#f59e0b'}} />,
+      '🔴': <TrendingDown size={18} style={{color: '#ef4444'}} />,
+      '🚨': <AlertTriangle size={20} style={{color: '#ef4444'}} />,
+      '⚠️': <AlertCircle size={20} style={{color: '#f59e0b'}} />,
+      '💡': <Lightbulb size={20} style={{color: '#3b82f6'}} />,
+      '🎯': <Target size={18} style={{color: '#ef4444'}} />,
+      '📊': <BarChart3 size={18} style={{color: '#f59e0b'}} />,
+    };
+    return iconMap[visualCode] || null;
+  };
+
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState([]);
   const [kpis, setKpis] = useState({});
@@ -61,12 +77,20 @@ const AdminReports = () => {
 
       // Trigger automatic real-time analysis
       setInsightsLoading(true);
-      const analysis = await generateAutoAnalysis(calculatedKpis, behavior, progress, bookingsData, usersData);
-      setAiInsights(analysis);
-      setLastUpdateTime(new Date());
-      setInsightsLoading(false);
+      setInsightsError(null);
+      try {
+        const analysis = await generateAutoAnalysis(calculatedKpis, behavior, progress, bookingsData, usersData);
+        setAiInsights(analysis);
+        setLastUpdateTime(new Date());
+      } catch (analysisError) {
+        console.error('Error generating analysis:', analysisError);
+        setInsightsError(`Analysis error: ${analysisError.message}`);
+      } finally {
+        setInsightsLoading(false);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setInsightsError(`Data fetch error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -495,15 +519,25 @@ const AdminReports = () => {
                         <h3><BarChart3 size={20} style={{display: 'inline', marginRight: '8px'}} /> Real-Time Insights</h3>
                         <ul className="insights-list">
                           {aiInsights.insights.map((insight, idx) => (
-                            <li key={idx}>
-                              <strong>{insight.title}</strong>
-                              <p>{insight.description}</p>
-                              {insight.metric && (
-                                <small>
-                                  Current: {insight.metric.current} {insight.metric.unit} 
-                                  {insight.metric.changePercent !== 0 && ` (${insight.metric.changePercent > 0 ? '+' : ''}${insight.metric.changePercent}%)`}
-                                </small>
-                              )}
+                            <li key={idx} style={{borderLeft: `4px solid ${
+                              insight.severity === 'positive' ? '#10b981' :
+                              insight.severity === 'neutral' ? '#3b82f6' :
+                              insight.severity === 'warning' ? '#f59e0b' :
+                              '#ef4444'
+                            }`, paddingLeft: '12px', display: 'flex', gap: '12px'}}>
+                              <div style={{marginTop: '2px', flexShrink: 0}}>
+                                {insight.visualCode && getIconFromVisualCode(insight.visualCode)}
+                              </div>
+                              <div style={{flex: 1}}>
+                                <strong>{insight.title}</strong>
+                                <p>{insight.description}</p>
+                                {insight.metric && (
+                                  <small>
+                                    Current: {insight.metric.current} {insight.metric.unit} 
+                                    {insight.metric.changePercent !== 0 && ` (${insight.metric.changePercent > 0 ? '+' : ''}${insight.metric.changePercent}%)`}
+                                  </small>
+                                )}
+                              </div>
                             </li>
                           ))}
                         </ul>
@@ -516,9 +550,19 @@ const AdminReports = () => {
                         <h3><AlertTriangle size={20} style={{display: 'inline', marginRight: '8px'}} /> Alerts</h3>
                         <ul className="insights-list">
                           {aiInsights.alerts.map((alert, idx) => (
-                            <li key={idx}>
-                              <strong>{alert.message}</strong>
-                              <p>{alert.suggestedAction}</p>
+                            <li key={idx} style={{borderLeft: `4px solid ${
+                              alert.severity === 'critical' ? '#ef4444' :
+                              alert.severity === 'warning' ? '#f59e0b' :
+                              '#3b82f6'
+                            }`, paddingLeft: '12px', display: 'flex', gap: '12px'}}>
+                              <div style={{marginTop: '2px', flexShrink: 0}}>
+                                {alert.visualCode && getIconFromVisualCode(alert.visualCode)}
+                              </div>
+                              <div style={{flex: 1}}>
+                                <strong>{alert.message}</strong>
+                                <p>{alert.suggestedAction}</p>
+                                {alert.affectedMetric && <small>Metric: {alert.affectedMetric} (Current: {alert.currentValue})</small>}
+                              </div>
                             </li>
                           ))}
                         </ul>
@@ -559,11 +603,20 @@ const AdminReports = () => {
                         <h3><CheckCircle size={20} style={{display: 'inline', marginRight: '8px'}} /> Recommended Actions</h3>
                         <ul className="insights-list">
                           {aiInsights.recommendations.map((rec, idx) => (
-                            <li key={idx}>
-                              <strong>{rec.title}</strong>
-                              <p>{rec.description}</p>
-                              <p><em>Action: {rec.action}</em></p>
-                              {rec.potentialImpact && <small>Impact: {rec.potentialImpact}</small>}
+                            <li key={idx} style={{borderLeft: `4px solid ${
+                              rec.priority === 'urgent' || rec.priority === 'high' ? '#ef4444' :
+                              rec.priority === 'medium' ? '#f59e0b' :
+                              '#3b82f6'
+                            }`, paddingLeft: '12px', display: 'flex', gap: '12px'}}>
+                              <div style={{marginTop: '2px', flexShrink: 0}}>
+                                {rec.visualCode && getIconFromVisualCode(rec.visualCode)}
+                              </div>
+                              <div style={{flex: 1}}>
+                                <strong>{rec.title}</strong>
+                                <p>{rec.description}</p>
+                                <p><em>Action: {rec.action}</em></p>
+                                {rec.potentialImpact && <small>Impact: {rec.potentialImpact}</small>}
+                              </div>
                             </li>
                           ))}
                         </ul>

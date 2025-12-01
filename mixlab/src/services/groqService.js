@@ -53,116 +53,34 @@ Analyze this data and provide insights in JSON format with these exact keys:
 Return ONLY valid JSON with no markdown, code blocks, or extra text.`;
 };
 
-// Real-time analysis prompt - optimized for fast processing
+// Real-time analysis prompt - optimized for fast processing and minimal tokens
 const createRealTimePrompt = (studioData) => {
-  return `You are a real-time business intelligence system for MixLab Studio. Analyze current studio metrics and generate IMMEDIATE, ACTIONABLE insights focused on NOW.
+  return `You are a real-time BI system for MixLab Studio. Generate 3-4 insights, 1-2 alerts, 2-3 recommendations NOW.
 
-## REAL-TIME STUDIO DATA (Current State)
-Generated: ${new Date().toISOString()}
-Analysis Period: Last 30 days + Today
+## DATA
+Today: ${studioData.sessionsToday} sessions, ₱${studioData.todayRevenue} revenue, ${studioData.activeStudentsNow} students
+Metrics: ${studioData.totalBookings} bookings (${studioData.confirmedBookings} confirmed), ${studioData.conversionRate}% conversion
+Changes: Revenue ${studioData.revenueChangePercent > 0 ? '+' : ''}${studioData.revenueChangePercent}%, Bookings ${studioData.bookingChangePercent > 0 ? '+' : ''}${studioData.bookingChangePercent}%
+Issues: ${studioData.cancelledToday} cancellations, ${studioData.noShowsToday} no-shows
+Top Service: ${studioData.topServices?.[0]?.name || 'N/A'} (${studioData.topServices?.[0]?.bookings || 0} bookings)
 
-**Today's Performance:**
-- Sessions Today: ${studioData.sessionsToday || 0}
-- Revenue Today: ₱${studioData.todayRevenue?.toLocaleString() || 0}
-- Active Students Now: ${studioData.activeStudentsNow || 0}
-- Studios Occupied: ${studioData.studiosOccupiedNow || 0}/${studioData.totalStudios || 3}
-- Upcoming in 1 Hour: ${studioData.upcomingIn1Hour || 0} sessions
-
-**Key Metrics:**
-- Total Bookings: ${studioData.totalBookings}
-- Confirmed: ${studioData.confirmedBookings}
-- Cancellations Today: ${studioData.cancelledToday || 0}
-- No-shows: ${studioData.noShowsToday || 0}
-- Conversion Rate: ${studioData.conversionRate}%
-- Active Users: ${studioData.totalUsers}
-- Total Revenue: ₱${studioData.revenue?.toLocaleString() || 0}
-
-**Comparisons (vs Yesterday/Last Week):**
-- Revenue Change: ${studioData.revenueChangePercent || 0}%
-- Booking Change: ${studioData.bookingChangePercent || 0}%
-- Occupancy Trend: ${studioData.occupancyTrend || 'stable'}
-
-**Top Services:** ${studioData.topServices?.map(s => `${s.name} (${s.bookings} bookings)`).join(', ') || 'N/A'}
-
-## REAL-TIME ANALYSIS REQUIREMENTS
-
-Generate insights in this EXACT JSON format (no markdown, no extra text):
-
+## OUTPUT FORMAT (JSON only, no markdown):
 {
   "generatedAt": "ISO timestamp",
-  "processingTime": "1.5s",
-  "summary": "One sentence about current studio status with today's key metric",
-  "insights": [
-    {
-      "type": "insight",
-      "category": "revenue|engagement|booking|operational",
-      "severity": "positive|neutral|warning|critical",
-      "priority": "urgent|high|medium|low",
-      "title": "Specific headline focused on NOW (max 70 chars)",
-      "description": "Current state with real-time context (2-3 sentences)",
-      "metric": {
-        "current": number,
-        "previous": number,
-        "changePercent": number,
-        "unit": "bookings|students|PHP|percent",
-        "timeContext": "today|this_week"
-      },
-      "impact": "high|medium|low",
-      "icon": "TrendingUp|TrendingDown|Users|Calendar|DollarSign|AlertCircle|CheckCircle|Zap"
-    }
-  ],
-  "recommendations": [
-    {
-      "type": "recommendation",
-      "category": "revenue|engagement|scheduling|retention",
-      "priority": "urgent|high|medium|low",
-      "title": "Action-oriented headline with timing (max 70 chars)",
-      "description": "Why this matters NOW with supporting data",
-      "action": "Specific immediate step (e.g., 'Send SMS for 3 empty slots at 4pm')",
-      "potentialImpact": "Quantified benefit (e.g., 'Could generate ₱2,400 today')",
-      "timeframe": "now|today|this_week",
-      "icon": "Target|TrendingUp|Users|Zap|Shield"
-    }
-  ],
-  "alerts": [
-    {
-      "type": "alert",
-      "severity": "warning|critical",
-      "message": "Urgent real-time issue",
-      "affectedMetric": "metric name",
-      "currentValue": "current state",
-      "suggestedAction": "immediate action to take NOW"
-    }
-  ],
-  "liveMetrics": {
-    "studiosOccupiedNow": number,
-    "sessionsToday": number,
-    "revenueToday": number,
-    "activeStudentsNow": number,
-    "upcomingIn1Hour": number
-  }
+  "summary": "One sentence status",
+  "insights": [{"type":"insight","category":"revenue|booking|engagement|operational","severity":"positive|neutral|warning|critical","priority":"urgent|high|medium|low","title":"Max 70 chars","description":"2-3 sentences","metric":{"current":0,"previous":0,"changePercent":0,"unit":"PHP|bookings|students|percent"},"visualCode":"🟢|🔵|🟡|🔴"}],
+  "alerts": [{"type":"alert","severity":"critical|warning|opportunity","visualCode":"🚨|⚠️|💡","message":"Issue","affectedMetric":"name","currentValue":"value","suggestedAction":"action"}],
+  "recommendations": [{"type":"recommendation","category":"revenue|scheduling|retention|engagement|operational","priority":"urgent|high|medium|low","visualCode":"🎯|📊|💡","title":"Action headline","description":"Why it matters","action":"Specific step","potentialImpact":"Benefit"}],
+  "liveMetrics":{"sessionsToday":0,"revenueToday":0,"activeStudentsNow":0}
 }
 
-## PRIORITY RULES (Process in this order):
-1. CRITICAL issues happening NOW (revenue crash, mass cancellations, system issues)
-2. TODAY's performance anomalies (high cancellations, capacity issues)
-3. Week-over-week changes (trends, patterns)
-4. Positive achievements and wins
-
-## TONE:
-- Use present tense: "happening now", "today", "currently"
-- Include specific timestamps and deadlines
-- Compare to yesterday/last week
-- Highlight immediate opportunities with urgency
-- Show live operational status
-- Provide "right now" actionable steps
-
-## LIMITS:
-- Generate 4-6 insights MAXIMUM (for speed)
-- Focus on high-impact, recent changes
-- Prioritize current day/week metrics
-- Surface urgent alerts immediately
-- Return ONLY valid JSON with no markdown or code blocks`;
+## RULES:
+- 3-4 insights max (most impactful)
+- 1-2 alerts max (only critical/urgent)
+- 2-3 recommendations max (highest ROI)
+- Use present tense
+- Include numbers and percentages
+- Return ONLY valid JSON`;
 };
 
 export const generateLlamaInsights = async (input) => {
@@ -220,13 +138,19 @@ export const generateLlamaInsights = async (input) => {
 
 export const generateRealTimeAnalysis = async (studioData) => {
   try {
+    console.log('generateRealTimeAnalysis called with studioData:', studioData);
+    
     if (!groq || !apiKey) {
+      console.error('Groq not initialized. groq:', !!groq, 'apiKey:', !!apiKey);
       throw new Error('Groq API key not configured');
     }
 
+    console.log('Creating real-time prompt...');
     const startTime = performance.now();
     const prompt = createRealTimePrompt(studioData);
+    console.log('Prompt created, length:', prompt.length);
 
+    console.log('Calling Groq API...');
     const message = await groq.chat.completions.create({
       messages: [
         {
@@ -239,10 +163,12 @@ export const generateRealTimeAnalysis = async (studioData) => {
       max_tokens: 2048
     });
 
+    console.log('Groq API response received:', message);
     const responseText = message.choices[0].message.content || '';
     const processingTime = ((performance.now() - startTime) / 1000).toFixed(2);
 
-    console.log('Real-time analysis response:', responseText);
+    console.log('Real-time analysis response text length:', responseText.length);
+    console.log('Real-time analysis response:', responseText.substring(0, 500));
 
     // Parse JSON from response - find complete JSON object
     let jsonMatch = responseText.match(/\{[\s\S]*\}/);

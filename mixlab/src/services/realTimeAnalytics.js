@@ -93,7 +93,10 @@ const buildStudioData = (kpis, customerBehavior, learningProgress, bookings, use
 // Main function: Generate real-time analysis
 export const generateAutoAnalysis = async (kpis, customerBehavior, learningProgress, bookings, users) => {
   try {
+    console.log('Starting auto-analysis with data:', { kpis, behaviorCount: customerBehavior?.length, bookingsCount: bookings?.length, usersCount: users?.length });
+    
     const studioData = buildStudioData(kpis, customerBehavior, learningProgress, bookings, users);
+    console.log('Built studio data:', studioData);
 
     // Check cache
     const now = Date.now();
@@ -112,6 +115,7 @@ export const generateAutoAnalysis = async (kpis, customerBehavior, learningProgr
     // Generate new analysis
     console.log('Generating new real-time analysis...');
     const analysis = await generateRealTimeAnalysis(studioData);
+    console.log('Analysis result:', analysis);
 
     // If analysis failed, use fallback
     if (!analysis) {
@@ -139,7 +143,8 @@ export const generateAutoAnalysis = async (kpis, customerBehavior, learningProgr
     };
   } catch (error) {
     console.error('Error in auto-analysis:', error);
-    return getDefaultRealTimeAnalysis();
+    const fallback = getDefaultRealTimeAnalysis();
+    return fallback;
   }
 };
 
