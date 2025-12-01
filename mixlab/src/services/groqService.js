@@ -8,13 +8,20 @@ const groq = apiKey ? new Groq({
   dangerouslyAllowBrowser: true // Allows API calls from browser
 }) : null;
 
-export const generateLlamaInsights = async (dataSummary) => {
+export const generateLlamaInsights = async (input) => {
   try {
     if (!groq || !apiKey) {
       throw new Error('Groq API key not configured. Please add VITE_GROQ_API_KEY to .env.local');
     }
     
-    const prompt = `You are a music studio business intelligence expert. Analyze this business data and provide strategic insights.
+    // Support both custom prompts and data summaries
+    let prompt;
+    if (input.isCustomPrompt && input.prompt) {
+      prompt = input.prompt;
+    } else {
+      // Legacy data summary format
+      const dataSummary = input;
+      prompt = `You are a music studio business intelligence expert. Analyze this business data and provide strategic insights.
 
 BUSINESS DATA:
 - Total Bookings: ${dataSummary.totalBookings}
@@ -50,8 +57,8 @@ Provide a JSON response with exactly this structure (no markdown, just JSON):
 Generate insights that are:
 1. Specific to music studio business
 2. Based on the actual data provided
-3. Actionable and practical
-4. Include emojis for visual clarity`;
+3. Actionable and practical`;
+    }
 
     const message = await groq.chat.completions.create({
       messages: [
@@ -69,6 +76,11 @@ Generate insights that are:
     const responseText = message.choices[0].message.content || '';
     
     console.log('Groq API Response:', responseText);
+    
+    // Return raw response for custom prompts, parse JSON for data summaries
+    if (input.isCustomPrompt) {
+      return responseText;
+    }
     
     // Parse JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);

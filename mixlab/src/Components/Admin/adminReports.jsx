@@ -167,146 +167,110 @@ const AdminReports = () => {
         timestamp: new Date().toLocaleString()
       };
 
-      console.log('Sending data to Llama:', dataSummary);
+      console.log('Generating insights for data:', dataSummary);
 
-      // Call real Llama 3 API
-      const insights = await generateLlamaInsights(dataSummary);
+      // Call AI with prompt-based analysis
+      const insights = await generateIntelligentInsights(dataSummary);
       
       if (insights) {
-        console.log('Received insights from Llama:', insights);
+        console.log('Received insights:', insights);
         setAiInsights(insights);
       } else {
-        // Fallback to intelligent local insights if API fails
-        console.warn('API returned null, using fallback');
-        const fallbackInsights = generateIntelligentInsights(dataSummary);
-        setAiInsights(fallbackInsights);
-        setInsightsError('Used local analysis (API returned no data)');
+        setInsightsError('Failed to generate insights');
       }
     } catch (error) {
       console.error('Error generating AI insights:', error);
       setInsightsError(`Error: ${error.message}`);
-      // Use fallback if error
-      const sortedServices = [...customerBehavior].sort((a, b) => b.bookings - a.bookings).slice(0, 3);
-      const fallbackInsights = generateIntelligentInsights({
-        totalBookings: kpis.totalBookings || 0,
-        confirmedBookings: kpis.confirmedBookings || 0,
-        conversionRate: kpis.bookingConversionRate || 0,
-        totalUsers: kpis.totalUsers || 0,
-        revenue: kpis.estimatedRevenue || 0,
-        topServices: sortedServices,
-        totalMonths: learningProgress.length
-      });
-      setAiInsights(fallbackInsights);
     } finally {
       setInsightsLoading(false);
     }
   };
 
-  const generateIntelligentInsights = (dataSummary) => {
-    const conversionRate = parseFloat(dataSummary.conversionRate);
-    const insights = {
-      keyInsights: [],
-      growthOpportunities: [],
-      riskAlerts: [],
-      recommendedActions: []
-    };
+  const generateIntelligentInsights = async (dataSummary) => {
+    try {
+      const prompt = `You are an expert data analyst specializing in studio performance optimization and business intelligence. Your role is to analyze comprehensive studio metrics and provide actionable, data-driven insights and recommendations.
 
-    // Key Insights
-    if (dataSummary.totalBookings > 0) {
-      insights.keyInsights.push(
-        `You have ${dataSummary.totalBookings} total bookings with ${dataSummary.confirmedBookings} confirmed (${dataSummary.conversionRate}% conversion rate)`
-      );
-    }
+## STUDIO PERFORMANCE DATA
+- Total Bookings: ${dataSummary.totalBookings}
+- Confirmed Bookings: ${dataSummary.confirmedBookings}
+- Booking Conversion Rate: ${dataSummary.conversionRate}%
+- Total Active Users: ${dataSummary.totalUsers}
+- Estimated Revenue: ₱${dataSummary.revenue?.toLocaleString() || 0}
+- Top Services: ${dataSummary.topServices?.map(s => `${s.name} (${s.bookings} bookings, ₱${s.revenue?.toLocaleString() || 0} revenue)`).join('; ') || 'None'}
+- Data Period: ${dataSummary.totalMonths} months
 
-    if (dataSummary.totalUsers > 0) {
-      const bookingsPerUser = (dataSummary.totalBookings / dataSummary.totalUsers).toFixed(2);
-      insights.keyInsights.push(
-        `Average ${bookingsPerUser} bookings per user from ${dataSummary.totalUsers} registered users`
-      );
-    }
+## ANALYSIS REQUIREMENTS
 
-    if (dataSummary.revenue > 0) {
-      insights.keyInsights.push(
-        `Estimated revenue: ₱${dataSummary.revenue.toLocaleString()} from confirmed bookings`
-      );
-    }
+Analyze this data and provide insights in JSON format with these exact keys:
 
-    if (dataSummary.topServices.length > 0) {
-      const topService = dataSummary.topServices[0];
-      insights.keyInsights.push(
-        `"${topService.name}" is your most popular service with ${topService.bookings} bookings`
-      );
-    }
+1. **keyInsights** (array of 4-5 strings): Most significant patterns and metrics
+   - Use specific numbers and percentages
+   - Connect findings to business impact
+   - Identify both positive trends and concerns
 
-    // Growth Opportunities
-    if (conversionRate < 50) {
-      insights.growthOpportunities.push(
-        `Improve conversion rate from ${dataSummary.conversionRate}% - Consider offering promotions or improving booking experience`
-      );
-    }
+2. **growthOpportunities** (array of 4-5 strings): Revenue and engagement expansion opportunities
+   - Break down by service categories or customer segments
+   - Include concrete action steps
+   - Prioritize by impact potential
 
-    if (dataSummary.totalUsers > 0 && dataSummary.totalBookings / dataSummary.totalUsers < 2) {
-      insights.growthOpportunities.push(
-        `Increase repeat bookings - Implement loyalty program or follow-up campaigns`
-      );
-    }
+3. **riskAlerts** (array of 2-3 strings): Areas requiring immediate attention
+   - Flag conversion rate issues, pending bookings, or service imbalances
+   - Suggest possible root causes
 
-    if (dataSummary.topServices.length > 1) {
-      const secondService = dataSummary.topServices[1];
-      const topService = dataSummary.topServices[0];
-      if (topService.bookings > secondService.bookings * 2) {
-        insights.growthOpportunities.push(
-          `Promote underperforming services like "${secondService.name}" to balance revenue streams`
-        );
+4. **recommendedActions** (array of 5-6 strings): Specific, prioritized recommendations
+   - Format: "[Priority: HIGH/MEDIUM] Action - Expected Impact"
+   - Include success metrics to track
+   - Estimate potential business impact when possible
+
+## TONE & STYLE
+- Be clear, concise, and data-focused
+- Use comparative language (e.g., "up 23% vs average", "2.5x higher")
+- Prioritize insights that directly impact revenue or customer satisfaction
+- Avoid jargon; explain technical terms when necessary
+
+Return ONLY valid JSON with no markdown, code blocks, or extra text.`;
+
+      const response = await generateLlamaInsights({ prompt, isCustomPrompt: true });
+      
+      if (response && typeof response === 'string') {
+        try {
+          return JSON.parse(response);
+        } catch (e) {
+          console.error('Failed to parse AI response:', e);
+          return getDefaultInsights(dataSummary);
+        }
       }
+      return getDefaultInsights(dataSummary);
+    } catch (error) {
+      console.error('Error in generateIntelligentInsights:', error);
+      return getDefaultInsights(dataSummary);
     }
+  };
 
-    insights.growthOpportunities.push(
-      `Expand to corporate team sessions and group discounts`
-    );
-
-    // Risk Alerts
-    if (conversionRate < 30) {
-      insights.riskAlerts.push(
-        `LOW CONVERSION RATE (${dataSummary.conversionRate}%) - Investigate booking cancellations and user feedback`
-      );
-    }
-
-    const pendingBookings = bookings.filter(b => b.status === 'Pending').length;
-    if (pendingBookings > dataSummary.confirmedBookings) {
-      insights.riskAlerts.push(
-        `HIGH PENDING BOOKINGS - ${pendingBookings} bookings awaiting confirmation. Consider automated reminders.`
-      );
-    }
-
-    insights.riskAlerts.push(
-      `Monitor seasonal trends - Prepare for peak and off-peak periods`
-    );
-
-    // Recommended Actions
-    insights.recommendedActions.push(
-      `Send personalized follow-ups to pending bookings to improve conversion`
-    );
-
-    insights.recommendedActions.push(
-      `Create targeted campaigns for top customers to encourage repeat bookings`
-    );
-
-    if (dataSummary.totalMonths > 1) {
-      insights.recommendedActions.push(
-        `Analyze monthly trends and adjust pricing/availability accordingly`
-      );
-    }
-
-    insights.recommendedActions.push(
-      `Collect feedback from confirmed bookings to identify improvement areas`
-    );
-
-    insights.recommendedActions.push(
-      `Optimize service offerings based on customer demand patterns`
-    );
-
-    return insights;
+  const getDefaultInsights = (dataSummary) => {
+    return {
+      keyInsights: [
+        `Total bookings: ${dataSummary.totalBookings} with ${dataSummary.confirmedBookings} confirmed`,
+        `Conversion rate: ${dataSummary.conversionRate}% from ${dataSummary.totalUsers} users`,
+        `Estimated revenue: ₱${dataSummary.revenue?.toLocaleString() || 0}`,
+        `Top service: ${dataSummary.topServices?.[0]?.name || 'N/A'}`
+      ],
+      growthOpportunities: [
+        'Increase customer retention through loyalty programs',
+        'Expand service offerings based on demand patterns',
+        'Implement targeted marketing campaigns'
+      ],
+      riskAlerts: [
+        'Monitor booking conversion rates regularly',
+        'Track seasonal trends and adjust capacity'
+      ],
+      recommendedActions: [
+        'Send follow-up campaigns to pending bookings',
+        'Analyze customer feedback for improvements',
+        'Optimize pricing based on demand',
+        'Create personalized offers for repeat customers'
+      ]
+    };
   };
 
   // Export report
