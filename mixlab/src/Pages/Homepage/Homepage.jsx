@@ -44,6 +44,17 @@ const Homepage = () => {
     }
   };
 
+  // --- QR PASS LOGIC ---
+  const handlePassClick = () => {
+    if (user) {
+      // If logged in, go to their QR Pass
+      navigate('/my-pass');
+    } else {
+      // If not, ask them to login first
+      setShowAuthModal(true);
+    }
+  };
+
   const sliderItems = [
     {
       img: micImg,
@@ -156,6 +167,11 @@ const Homepage = () => {
                 <div className="buttons">
                   <button className='title-button' onClick={handleScrollDown}>
                     SCROLL DOWN TO SEE MORE
+                  </button>
+
+                  {/* --- NEW QR CODE BUTTON --- */}
+                  <button className='title-button' onClick={handlePassClick}>
+                    MY QR PASS
                   </button>
                   
                   {item.hasGame && (
@@ -315,7 +331,7 @@ const Homepage = () => {
               <div className="videocard" data-aos="slide-left" data-aos-duration="1800">
                 <iframe 
                   className='vi' 
-                  src="https://www.youtube.com/embed/cpKqqQNukuU?autoplay=1&mute=0&loop=1&playlist=cpKqqQNukuU&controls=0&showinfo=0" 
+                  src="https://www.youtube.com/embed/cpKqqQNukuU?autoplay=0&mute=0&loop=1&playlist=cpKqqQNukuU&controls=0&showinfo=0" 
                   title="YouTube video player" 
                   frameBorder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 

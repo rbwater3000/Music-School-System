@@ -9,22 +9,23 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
 } from 'recharts';
-// 1. Added new icons for the new tabs
 import { 
     FaChartLine, FaCalendarAlt, FaSignOutAlt, FaEdit, FaSave, 
     FaQrcode, FaTimes, FaTrashAlt, FaUserEdit, FaUsers, 
-    FaCreditCard, FaBell 
+    FaCreditCard, FaBell, FaBars, FaFileAlt 
 } from 'react-icons/fa';
+import AdminReports from './adminReports';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Data States
   const [bookings, setBookings] = useState([]);
-  const [usersList, setUsersList] = useState([]); // Store registered users
-  const [payments, setPayments] = useState([]);   // Store payment history
-  const [notifications, setNotifications] = useState([]); // Store alerts
+  const [usersList, setUsersList] = useState([]); 
+  const [payments, setPayments] = useState([]);   
+  const [notifications, setNotifications] = useState([]); 
 
   // Stats & Graphs
   const [stats, setStats] = useState({ recording: 0, rehearsal: 0, lesson: 0, mixing: 0 });
@@ -43,12 +44,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchBookings();
     fetchRevenueData(); 
-    fetchUsers(); // 2. Load Users
-    // Notifications and Payments are derived from bookings for now
+    fetchUsers(); 
   }, []);
 
   // --- FETCH FUNCTIONS ---
-
   const fetchBookings = async () => {
     try {
       const q = query(collection(db, "bookings"), orderBy("date", "desc"));
@@ -56,8 +55,8 @@ const AdminDashboard = () => {
       const bookingList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBookings(bookingList);
       calculateStats(bookingList);
-      generatePayments(bookingList);      // Generate mock payments from bookings
-      generateNotifications(bookingList); // Generate notifications from recent bookings
+      generatePayments(bookingList);      
+      generateNotifications(bookingList); 
     } catch (error) {
       console.error("Error fetching bookings:", error);
     }
@@ -87,7 +86,6 @@ const AdminDashboard = () => {
             });
         }
       } else {
-        // Default data if none exists
         const blankData = Array(8).fill(null).map((_, i) => ({ name: `Date ${i+1}`, revenue: 0 }));
         setRevenueData(blankData);
       }
@@ -97,7 +95,6 @@ const AdminDashboard = () => {
   };
 
   // --- LOGIC HELPERS ---
-
   const calculateStats = (data) => {
     let counts = { recording: 0, rehearsal: 0, lesson: 0, mixing: 0 };
     data.forEach(b => {
@@ -110,22 +107,20 @@ const AdminDashboard = () => {
     setStats(counts);
   };
 
-  // Simulating Payments based on "Done" or "Confirmed" bookings
   const generatePayments = (data) => {
     const paidBookings = data.filter(b => b.status === 'Confirmed' || b.status === 'Done');
     const mockPayments = paidBookings.map(b => ({
         id: "PAY-" + b.bookingId,
         user: b.userEmail,
-        amount: b.service.includes("Recording") ? 1500 : 500, // Example pricing
+        amount: b.service.includes("Recording") ? 1500 : 500, 
         date: b.date,
         status: "Completed"
     }));
     setPayments(mockPayments);
   };
 
-  // Simulating Notifications based on recent bookings
   const generateNotifications = (data) => {
-    const recent = data.slice(0, 5); // Take top 5 recent
+    const recent = data.slice(0, 5); 
     const alerts = recent.map(b => ({
         id: b.id,
         message: `New Booking received from ${b.userEmail} for ${b.service}`,
@@ -146,7 +141,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Revenue Handlers
   const handleRevenueChange = (index, field, value) => {
     const newData = revenueData.map((item, i) => {
       if (i === index) {
@@ -180,7 +174,6 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
-  // Graph Data Prep
   const graphData = revenueData.map(d => ({ ...d, revenue: Number(d.revenue) || 0 }));
   const serviceData = [
     { name: 'Band Rehearsal', count: stats.rehearsal },
@@ -192,7 +185,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-wrapper">
-      {/* 3. UPDATED SIDEBAR */}
+      {/* SIDEBAR */}
       <div className="admin-sidebar">
         <div className="sidebar-logo"><h2>MixLab Admin</h2></div>
         
@@ -204,27 +197,38 @@ const AdminDashboard = () => {
         </div>
 
         <ul className="sidebar-menu">
-          <li className={activeTab === 'Dashboard' ? 'active' : ''} onClick={() => setActiveTab('Dashboard')}>
+          <li className={activeTab === 'Dashboard' ? 'active' : ''} onClick={() => { setActiveTab('Dashboard'); setSidebarOpen(false); }}>
             <FaChartLine /> <span>Dashboard</span>
           </li>
-          <li className={activeTab === 'Users' ? 'active' : ''} onClick={() => setActiveTab('Users')}>
+          <li className={activeTab === 'Users' ? 'active' : ''} onClick={() => { setActiveTab('Users'); setSidebarOpen(false); }}>
             <FaUsers /> <span>Users</span>
           </li>
-          <li className={activeTab === 'Bookings' ? 'active' : ''} onClick={() => setActiveTab('Bookings')}>
+          <li className={activeTab === 'Bookings' ? 'active' : ''} onClick={() => { setActiveTab('Bookings'); setSidebarOpen(false); }}>
             <FaCalendarAlt /> <span>Schedule</span>
           </li>
-          <li className={activeTab === 'Payments' ? 'active' : ''} onClick={() => setActiveTab('Payments')}>
+          <li className={activeTab === 'Payments' ? 'active' : ''} onClick={() => { setActiveTab('Payments'); setSidebarOpen(false); }}>
             <FaCreditCard /> <span>Payments</span>
           </li>
-          <li className={activeTab === 'Notifications' ? 'active' : ''} onClick={() => setActiveTab('Notifications')}>
+          <li className={activeTab === 'Notifications' ? 'active' : ''} onClick={() => { setActiveTab('Notifications'); setSidebarOpen(false); }}>
             <FaBell /> <span>Notifications</span>
             {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
+          </li>
+          <li className={activeTab === 'Reports' ? 'active' : ''} onClick={() => { setActiveTab('Reports'); setSidebarOpen(false); }}>
+            <FaFileAlt /> <span>Reports</span>
           </li>
         </ul>
         <div className="sidebar-logout">
           <button onClick={handleAdminLogout}><FaSignOutAlt /> <span>Log Out</span></button>
         </div>
       </div>
+
+      {/* Hamburger Menu Button - Mobile Only */}
+      <button className="admin-menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        {sidebarOpen ? <FaTimes /> : <FaBars />}
+      </button>
+
+      {/* Overlay for Mobile */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
 
       <div className="admin-content">
         <div className="admin-header">
@@ -235,6 +239,31 @@ const AdminDashboard = () => {
         {/* --- TAB: DASHBOARD --- */}
         {activeTab === 'Dashboard' && (
            <>
+            {/* ITO YUNG SCANNER PARA SA QR */}
+            <div style={{ marginBottom: '20px' }}>
+                <button 
+                    onClick={() => navigate('/admin-scanner')}
+                    style={{
+                        backgroundColor: '#303F9F',
+                        color: 'white',
+                        padding: '15px 25px',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+                    }}
+                    onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                    onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                >
+                    <FaCamera size={20} /> LAUNCH CHECK-IN SCANNER
+                </button>
+            </div>
+
             <div className="charts-row">
                 {/* REVENUE CHART */}
                 <div className="chart-card large">
@@ -435,6 +464,10 @@ const AdminDashboard = () => {
                 {notifications.length === 0 && <p>No new notifications.</p>}
              </div>
          </div>
+        )}
+
+        {activeTab === 'Reports' && (
+          <AdminReports />
         )}
 
       </div>
