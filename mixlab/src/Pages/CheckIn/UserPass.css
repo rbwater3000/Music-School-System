@@ -1,0 +1,94 @@
+.pass-container {
+    min-height: 100vh;
+    background-color: #0f0f13;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.id-card {
+    background: linear-gradient(145deg, #1e1e24, #2a2a35);
+    width: 300px;
+    border-radius: 20px;
+    padding: 30px 20px;
+    box-shadow: 0 0 30px rgba(255, 247, 0, 0.4);
+    border: 1px solid #ffd700;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.id-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+}
+
+.member-type {
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 20%;
+}
+
+.qr-wrapper {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 25px auto;
+    width: fit-content;
+}
+
+.id-details h3 {
+    color: white;
+    font-size: 20px;
+    margin: 10px 0 5px 0;
+    text-transform: uppercase;
+}
+
+.uid-text {
+    color: #666;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.active-status {
+    margin-top: 15px;
+    color: #4caf50;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: #4caf50;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #4caf50;
+    animation: pulse 1.5s infinite;
+}
+
+.back-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
