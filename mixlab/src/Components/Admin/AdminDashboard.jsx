@@ -12,12 +12,14 @@ import {
 import { 
     FaChartLine, FaCalendarAlt, FaSignOutAlt, FaEdit, FaSave, 
     FaQrcode, FaTimes, FaTrashAlt, FaUserEdit, FaUsers, 
-    FaCreditCard, FaBell, FaCamera // <--- 1. ADDED FaCamera HERE
+    FaCreditCard, FaBell, FaBars, FaFileAlt 
 } from 'react-icons/fa';
+import AdminReports from './adminReports';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Data States
   const [bookings, setBookings] = useState([]);
@@ -195,27 +197,38 @@ const AdminDashboard = () => {
         </div>
 
         <ul className="sidebar-menu">
-          <li className={activeTab === 'Dashboard' ? 'active' : ''} onClick={() => setActiveTab('Dashboard')}>
+          <li className={activeTab === 'Dashboard' ? 'active' : ''} onClick={() => { setActiveTab('Dashboard'); setSidebarOpen(false); }}>
             <FaChartLine /> <span>Dashboard</span>
           </li>
-          <li className={activeTab === 'Users' ? 'active' : ''} onClick={() => setActiveTab('Users')}>
+          <li className={activeTab === 'Users' ? 'active' : ''} onClick={() => { setActiveTab('Users'); setSidebarOpen(false); }}>
             <FaUsers /> <span>Users</span>
           </li>
-          <li className={activeTab === 'Bookings' ? 'active' : ''} onClick={() => setActiveTab('Bookings')}>
+          <li className={activeTab === 'Bookings' ? 'active' : ''} onClick={() => { setActiveTab('Bookings'); setSidebarOpen(false); }}>
             <FaCalendarAlt /> <span>Schedule</span>
           </li>
-          <li className={activeTab === 'Payments' ? 'active' : ''} onClick={() => setActiveTab('Payments')}>
+          <li className={activeTab === 'Payments' ? 'active' : ''} onClick={() => { setActiveTab('Payments'); setSidebarOpen(false); }}>
             <FaCreditCard /> <span>Payments</span>
           </li>
-          <li className={activeTab === 'Notifications' ? 'active' : ''} onClick={() => setActiveTab('Notifications')}>
+          <li className={activeTab === 'Notifications' ? 'active' : ''} onClick={() => { setActiveTab('Notifications'); setSidebarOpen(false); }}>
             <FaBell /> <span>Notifications</span>
             {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
+          </li>
+          <li className={activeTab === 'Reports' ? 'active' : ''} onClick={() => { setActiveTab('Reports'); setSidebarOpen(false); }}>
+            <FaFileAlt /> <span>Reports</span>
           </li>
         </ul>
         <div className="sidebar-logout">
           <button onClick={handleAdminLogout}><FaSignOutAlt /> <span>Log Out</span></button>
         </div>
       </div>
+
+      {/* Hamburger Menu Button - Mobile Only */}
+      <button className="admin-menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        {sidebarOpen ? <FaTimes /> : <FaBars />}
+      </button>
+
+      {/* Overlay for Mobile */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
 
       <div className="admin-content">
         <div className="admin-header">
@@ -451,6 +464,10 @@ const AdminDashboard = () => {
                 {notifications.length === 0 && <p>No new notifications.</p>}
              </div>
          </div>
+        )}
+
+        {activeTab === 'Reports' && (
+          <AdminReports />
         )}
 
       </div>
