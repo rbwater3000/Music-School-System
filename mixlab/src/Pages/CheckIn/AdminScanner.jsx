@@ -9,6 +9,7 @@ const AdminScanner = () => {
   const [scanResult, setScanResult] = useState(null);
   const [statusMessage, setStatusMessage] = useState("Ready to Scan");
   const navigate = useNavigate();
+  const scannerRef = React.useRef(null);
 
   useEffect(() => {
     // --- 1. HIDE NAVBAR & FOOTER ---
@@ -18,11 +19,15 @@ const AdminScanner = () => {
     if (nav) nav.style.display = 'none';
     if (footer) footer.style.display = 'none';
 
-    // --- 2. FIX DOUBLE CAMERA (Clear container before starting) ---
-    // This forces the div to be empty before we add a new scanner
+    // --- 2. FIX DOUBLE CAMERA (Clear previous scanner if exists) ---
     const readerElement = document.getElementById('reader');
     if (readerElement) {
         readerElement.innerHTML = ""; 
+    }
+
+    // Only create a new scanner if one doesn't already exist
+    if (scannerRef.current !== null) {
+      return; // Scanner already exists, don't create another
     }
 
     // --- 3. INITIALIZE SCANNER ---
@@ -32,6 +37,7 @@ const AdminScanner = () => {
       /* verbose= */ false
     );
 
+    scannerRef.current = scanner;
     scanner.render(onScanSuccess, onScanFailure);
 
     async function onScanSuccess(decodedText) {
@@ -74,7 +80,10 @@ const AdminScanner = () => {
     return () => {
       // Try to clear scanner
       try {
-        scanner.clear().catch(error => console.log("Scanner clear error", error));
+        if (scannerRef.current) {
+          scannerRef.current.clear().catch(error => console.log("Scanner clear error", error));
+          scannerRef.current = null; // Reset reference
+        }
       } catch (e) {
         console.log("Scanner cleanup", e);
       }
