@@ -492,6 +492,51 @@ small {
     font-size: 20px;
 }
 
+
+.status-select.Check-in {
+    background-color: #8e44ad; /* Purple color for Check-in */
+    color: white;
+    border: 1px solid #9b59b6;
+}
+
+/* If you use badges */
+.badge.Check-in {
+    background-color: #8e44ad;
+    color: white;
+}
+
+.action-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.action-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #aaa;
+}
+
+.scan-dropdown {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #1e1e24;
+    color: white;
+    border: 1px solid #303F9F;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.scan-dropdown:focus {
+    box-shadow: 0 0 10px #303F9F;
+}
+
+.scan-dropdown option {
+    background-color: #1e1e24;
+}
+
 /* =========================================
    ADMIN REPORTS STYLING
    ========================================= */
@@ -1333,4 +1378,5 @@ small {
         background: #2980b9;
     }
 }
+
 

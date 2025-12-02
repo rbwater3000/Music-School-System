@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Admin.css';
 import { db, auth } from '../../firebase'; 
-import { collection, getDocs, query, orderBy, doc, updateDoc, getDoc, setDoc, limit } from 'firebase/firestore'; 
+import { collection, getDocs, onSnapshot, query, orderBy, doc, updateDoc, getDoc, setDoc, limit } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import QRCode from "react-qr-code";
@@ -46,10 +46,40 @@ const AdminDashboard = () => {
     return () => { if (footer) footer.style.display = ''; };
   }, []);
 
+  // --- REAL-TIME DATA LISTENER ---
   useEffect(() => {
-    fetchBookings();
-    fetchRevenueData(); 
-    fetchUsers(); 
+    // 1. LISTEN TO BOOKINGS (Real-time)
+    const bookingsQuery = query(collection(db, "bookings"), orderBy("date", "desc"));
+    
+    // This function runs automatically whenever Firebase changes
+    const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
+      const bookingList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // Update State
+      setBookings(bookingList);
+      
+      // Recalculate derived data immediately
+      calculateStats(bookingList);
+      generatePayments(bookingList);
+      generateNotifications(bookingList);
+    }, (error) => {
+      console.error("Error listening to bookings:", error);
+    });
+
+    // 2. LISTEN TO USERS (Real-time) - Optional, but good for the User table
+    const unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+      const uList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsersList(uList);
+    });
+
+    // Load other static data
+    fetchRevenueData();
+
+    // Cleanup function: Stops listening when you leave the page
+    return () => {
+      unsubscribeBookings();
+      unsubscribeUsers();
+    };
   }, []);
 
   // --- FETCH FUNCTIONS ---
@@ -972,6 +1002,7 @@ const AdminDashboard = () => {
                                      <select className={`status-select ${b.status}`} value={b.status} onChange={(e) => handleStatusChange(b.id, e.target.value)}>
                                          <option value="Pending">Pending</option>
                                          <option value="Confirmed">Confirmed</option>
+                                         <option value="Check-in">Check-in</option>
                                          <option value="Done">Done</option>
                                          <option value="Cancelled">Cancelled</option>
                                      </select>

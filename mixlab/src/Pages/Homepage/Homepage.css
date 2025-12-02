@@ -456,7 +456,7 @@ header a{
     border-radius: 12px;
     background-blend-mode: darken;
     background-color: #0000006f;
-    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 1)),url(/src/assets/1mixlabphoto/studio/artist1.jpg);
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 1)),url(/src/assets/1mixlabphoto/artist/cbnems.jpg);
     display: flex;
     align-items: center;
     justify-content: end;
@@ -1346,7 +1346,7 @@ header a{
         border-radius: 12px;
         background-blend-mode: darken;
         background-color: #0000006f;
-        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 1)),url(/src/assets/1mixlabphoto/studio/artist1.jpg);
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 1)),url(/src/assets/1mixlabphoto/artist/cbnems.jpg);
         display: flex;
         align-items: center;
         justify-content: end;
