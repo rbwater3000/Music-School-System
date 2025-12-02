@@ -55,13 +55,17 @@ Return ONLY valid JSON with no markdown, code blocks, or extra text.`;
 
 // Real-time analysis prompt - optimized for fast processing and minimal tokens
 const createRealTimePrompt = (studioData) => {
+  const cancellationRate = studioData.sessionsToday > 0 
+    ? ((studioData.cancelledToday / studioData.sessionsToday) * 100).toFixed(1)
+    : 0;
+  
   return `You are a real-time BI system for MixLab Studio. Generate 3-4 insights, 1-2 alerts, 2-3 recommendations NOW.
 
 ## DATA
 Today: ${studioData.sessionsToday} sessions, ₱${studioData.todayRevenue} revenue, ${studioData.activeStudentsNow} students
 Metrics: ${studioData.totalBookings} bookings (${studioData.confirmedBookings} confirmed), ${studioData.conversionRate}% conversion
 Changes: Revenue ${studioData.revenueChangePercent > 0 ? '+' : ''}${studioData.revenueChangePercent}%, Bookings ${studioData.bookingChangePercent > 0 ? '+' : ''}${studioData.bookingChangePercent}%
-Issues: ${studioData.cancelledToday} cancellations, ${studioData.noShowsToday} no-shows
+CRITICAL ISSUES: ${studioData.cancelledToday} cancellations (${cancellationRate}% cancellation rate), ${studioData.noShowsToday} no-shows
 Top Service: ${studioData.topServices?.[0]?.name || 'N/A'} (${studioData.topServices?.[0]?.bookings || 0} bookings)
 
 ## OUTPUT FORMAT (JSON only, no markdown):
@@ -80,6 +84,8 @@ Top Service: ${studioData.topServices?.[0]?.name || 'N/A'} (${studioData.topServ
 - 2-3 recommendations max (highest ROI)
 - Use present tense
 - Include numbers and percentages
+- MUST flag cancellations >5% as critical alert
+- MUST flag no-shows >3 as warning alert
 - Return ONLY valid JSON`;
 };
 

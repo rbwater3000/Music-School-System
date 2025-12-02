@@ -11,8 +11,7 @@ const AdminScanner = () => {
   // --- 1. NEW STATE FOR DROPDOWN SELECTION ---
   const [scanAction, setScanAction] = useState("Check-in"); 
   const navigate = useNavigate();
-  
-  const scannerRef = useRef(null);
+  const scannerRef = React.useRef(null);
 
   useEffect(() => {
     const nav = document.querySelector('nav') || document.querySelector('.Nav1');
@@ -20,17 +19,26 @@ const AdminScanner = () => {
     if (nav) nav.style.display = 'none';
     if (footer) footer.style.display = 'none';
 
-    const readerElement = document.getElementById("reader");
-    if (readerElement) readerElement.innerHTML = "";
+    // --- 2. FIX DOUBLE CAMERA (Clear previous scanner if exists) ---
+    const readerElement = document.getElementById('reader');
+    if (readerElement) {
+        readerElement.innerHTML = ""; 
+    }
 
-    const initTimer = setTimeout(() => {
-        scannerRef.current = new Html5QrcodeScanner(
-            "reader",
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            false
-        );
-        scannerRef.current.render(onScanSuccess, onScanFailure);
-    }, 100);
+    // Only create a new scanner if one doesn't already exist
+    if (scannerRef.current !== null) {
+      return; // Scanner already exists, don't create another
+    }
+
+    // --- 3. INITIALIZE SCANNER ---
+    const scanner = new Html5QrcodeScanner(
+      "reader",
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      /* verbose= */ false
+    );
+
+    scannerRef.current = scanner;
+    scanner.render(onScanSuccess, onScanFailure);
 
     // --- MAIN SUCCESS FUNCTION ---
     async function onScanSuccess(decodedText) {
@@ -111,9 +119,17 @@ const AdminScanner = () => {
     function onScanFailure(error) {}
 
     return () => {
-      clearTimeout(initTimer);
-      if (scannerRef.current) scannerRef.current.clear().catch(e => {});
-      if(readerElement) readerElement.innerHTML = "";
+      // Try to clear scanner
+      try {
+        if (scannerRef.current) {
+          scannerRef.current.clear().catch(error => console.log("Scanner clear error", error));
+          scannerRef.current = null; // Reset reference
+        }
+      } catch (e) {
+        console.log("Scanner cleanup", e);
+      }
+
+      // Show Nav/Footer again
       if (nav) nav.style.display = '';
       if (footer) footer.style.display = '';
     };

@@ -7,6 +7,7 @@ let analysisCache = null;
 let cacheTimestamp = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 let lastAnalyzedData = null;
+let autoAnalysisEnabled = true; // Feature flag to disable auto-analysis during rate limiting
 
 // Check if data has changed significantly (>10% deviation)
 const hasSignificantChange = (newData, oldData) => {
@@ -37,6 +38,8 @@ const buildStudioData = (kpis, customerBehavior, learningProgress, bookings, use
   const cancelledToday = todayBookings.filter(b => b.status === 'Cancelled').length;
   const noShowsToday = todayBookings.filter(b => b.status === 'NoShow').length;
   const completedToday = todayBookings.filter(b => b.status === 'Done').length;
+  
+  console.log(`[Real-Time Analytics] Today: ${today}, Total bookings: ${todayBookings.length}, Cancelled: ${cancelledToday}, NoShows: ${noShowsToday}, Completed: ${completedToday}`);
 
   // Calculate revenue for today
   const todayRevenue = todayBookings
@@ -93,6 +96,16 @@ const buildStudioData = (kpis, customerBehavior, learningProgress, bookings, use
 // Main function: Generate real-time analysis
 export const generateAutoAnalysis = async (kpis, customerBehavior, learningProgress, bookings, users) => {
   try {
+    // Check if auto-analysis is disabled
+    if (!autoAnalysisEnabled) {
+      console.log('Auto-analysis is disabled. Using fallback.');
+      return {
+        ...getDefaultRealTimeAnalysis(),
+        autoAnalysisDisabled: true,
+        message: 'Real-time AI analysis is temporarily disabled to manage API rate limits. Please try again later.'
+      };
+    }
+
     console.log('Starting auto-analysis with data:', { kpis, behaviorCount: customerBehavior?.length, bookingsCount: bookings?.length, usersCount: users?.length });
     
     const studioData = buildStudioData(kpis, customerBehavior, learningProgress, bookings, users);
@@ -201,4 +214,15 @@ export const getCacheStatus = () => {
     ageSeconds: Math.round(age / 1000),
     maxAge: Math.round(CACHE_DURATION / 1000)
   };
+};
+
+// Toggle auto-analysis on/off
+export const setAutoAnalysisEnabled = (enabled) => {
+  autoAnalysisEnabled = enabled;
+  console.log(`Auto-analysis ${enabled ? 'enabled' : 'disabled'}`);
+};
+
+// Get current auto-analysis status
+export const isAutoAnalysisEnabled = () => {
+  return autoAnalysisEnabled;
 };
